@@ -14,9 +14,10 @@
   --grid: #ecebe7;
   --text-primary: #0b0b0b;
   --text-secondary: #52514e;
-  --text-muted: #77766f;
+  --text-muted: #67665f;
   --series-1: #2a78d6;
   --series-2: #eb6834;
+  --accent: #1f6bc4;
   --good: #0f7a3d;
   --bad: #b3261e;
   --warn-bg: #fff4d6;
@@ -34,6 +35,7 @@
     --text-muted: #9a998f;
     --series-1: #3987e5;
     --series-2: #d95926;
+    --accent: #2a6fc9;
     --good: #5cc98a;
     --bad: #f2867d;
     --warn-bg: #3a2e0a;
@@ -51,108 +53,165 @@
   --text-muted: #9a998f;
   --series-1: #3987e5;
   --series-2: #d95926;
+  --accent: #2a6fc9;
   --good: #5cc98a;
   --bad: #f2867d;
   --warn-bg: #3a2e0a;
   --warn-text: #f3d68a;
 }
 * { box-sizing: border-box; }
+html, body { margin: 0; }
 body {
-  margin: 0;
   background: var(--surface-0);
   color: var(--text-primary);
-  font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font: 14px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
-main { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; }
-h1 { font-size: 20px; margin: 0; font-weight: 600; }
-h2 { font-size: 15px; margin: 0 0 12px; font-weight: 600; }
-.sub { color: var(--text-secondary); font-size: 13px; margin: 4px 0 20px; }
-.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
-.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 16px; }
-.tile .label { color: var(--text-secondary); font-size: 13px; }
-.tile .value { font-size: 40px; font-weight: 600; line-height: 1.1; margin: 6px 0 2px; }
-.tile.hero .value { font-size: 52px; }
-.tile .unit { font-size: 14px; font-weight: 400; color: var(--text-secondary); margin-left: 4px; }
-.tile .meta { font-size: 13px; color: var(--text-secondary); }
-.delta.up { color: var(--good); }
-.delta.down { color: var(--bad); }
-.delta.flat { color: var(--text-muted); }
-.section { margin-bottom: 16px; }
-.legend { display: flex; gap: 16px; font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; flex-wrap: wrap; }
-.swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
-#chart { position: relative; }
-#chart svg { display: block; width: 100%; height: auto; overflow: visible; }
-#tip {
-  position: absolute; pointer-events: none; display: none;
-  background: var(--surface-1); border: 1px solid var(--border); border-radius: 6px;
-  padding: 6px 10px; font-size: 13px; box-shadow: 0 2px 8px rgb(0 0 0 / 0.12); white-space: nowrap;
-}
-.table-wrap { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 14px; }
-th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--grid); white-space: nowrap; }
-th:first-child, td:first-child { text-align: left; }
-th { color: var(--text-secondary); font-weight: 500; font-size: 13px; }
-td { font-variant-numeric: tabular-nums; }
-tr.total td { font-weight: 600; border-bottom: none; }
-.err { color: var(--bad); font-size: 12px; }
-.warn { background: var(--warn-bg); color: var(--warn-text); border-radius: 8px; padding: 10px 12px; font-size: 13px; margin-bottom: 16px; }
-.foot { color: var(--text-muted); font-size: 12px; margin-top: 20px; }
-.foot p { margin: 4px 0; }
-#gate { max-width: 340px; margin: 18vh auto 0; }
-#gate form { display: flex; gap: 8px; margin-top: 12px; }
+:focus-visible { outline: 2px solid var(--series-1); outline-offset: 2px; }
+.hidden { display: none !important; }
+.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; }
+
+/* ---------- gate ---------- */
+#gate { max-width: 340px; margin: 18vh auto 0; padding: 20px; width: calc(100% - 32px); }
+#gate h1 { font-size: 18px; margin: 0 0 4px; font-weight: 600; }
+#gate label { display: block; color: var(--text-secondary); font-size: 13px; margin-bottom: 10px; }
+#gate form { display: flex; gap: 8px; }
 #gate input {
   flex: 1; min-width: 0; font: inherit; padding: 8px 10px; border-radius: 8px;
   border: 1px solid var(--border); background: var(--surface-0); color: var(--text-primary);
 }
-#gate button, .linkbtn {
-  font: inherit; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border);
-  background: var(--series-1); color: #fff; cursor: pointer;
+#gate input[aria-invalid="true"] { border-color: var(--bad); }
+#gate button {
+  font: inherit; font-weight: 500; padding: 8px 16px; border-radius: 8px; border: 0;
+  background: var(--accent); color: #fff; cursor: pointer;
 }
-.linkbtn { background: none; color: var(--text-muted); padding: 0; border: none; font-size: 12px; text-decoration: underline; }
-#gate .msg { color: var(--bad); font-size: 13px; min-height: 1.4em; margin-top: 8px; }
-.hidden { display: none; }
+#gate-msg { color: var(--bad); font-size: 13px; min-height: 1.4em; margin-top: 8px; }
+
+/* ---------- app: one screen on a laptop ---------- */
+#app {
+  max-width: 1280px; margin: 0 auto; padding: 16px 24px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+header h1 { font-size: 18px; margin: 0; font-weight: 600; }
+.meta-line { color: var(--text-secondary); font-size: 12px; display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+.linkbtn {
+  font: inherit; font-size: 12px; background: none; border: 0; padding: 0;
+  color: var(--text-secondary); text-decoration: underline; cursor: pointer;
+}
+.warn { background: var(--warn-bg); color: var(--warn-text); border-radius: 8px; padding: 8px 12px; font-size: 13px; }
+
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.tile { padding: 10px 16px; display: flex; flex-direction: column; gap: 2px; }
+.tile .label { color: var(--text-secondary); font-size: 13px; }
+.tile .value { font-size: 36px; font-weight: 600; line-height: 1.1; }
+.tile .value small { font-size: 13px; font-weight: 400; color: var(--text-secondary); margin-left: 6px; }
+.tile .sub { font-size: 12px; color: var(--text-secondary); }
+.delta { font-weight: 600; }
+.delta.up { color: var(--good); }
+.delta.down { color: var(--bad); }
+.delta.flat { color: var(--text-secondary); }
+
+.body { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 12px; }
+.panel { padding: 12px 16px; display: flex; flex-direction: column; min-height: 0; }
+.panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+.panel h2 { font-size: 14px; margin: 0; font-weight: 600; }
+.legend { display: flex; gap: 14px; font-size: 12px; color: var(--text-secondary); flex-wrap: wrap; }
+.swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+.swatch.partial { opacity: 0.5; background: var(--text-secondary); }
+
+#chart { position: relative; flex: 1; min-height: 240px; }
+#chart svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#chart rect.hit { fill: transparent; cursor: default; outline: none; }
+#chart rect.hit:focus-visible { stroke: var(--text-secondary); stroke-width: 1.5; stroke-dasharray: 3 3; }
+#tip {
+  position: absolute; pointer-events: none; display: none; z-index: 1;
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: 6px;
+  padding: 6px 10px; font-size: 12px; box-shadow: 0 2px 8px rgb(0 0 0 / 0.15); white-space: nowrap;
+}
+
+details { font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+summary { cursor: pointer; width: fit-content; }
+
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { padding: 4px 8px; text-align: right; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; padding-left: 0; }
+th:last-child, td:last-child { padding-right: 0; }
+th { color: var(--text-secondary); font-weight: 500; font-size: 12px; }
+td { font-variant-numeric: tabular-nums; }
+td.zero { color: var(--text-muted); }
+tr.total td { font-weight: 600; border-bottom: none; }
+.err { color: var(--bad); font-size: 11px; }
+.note { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+.defs p { margin: 6px 0 0; max-width: 90ch; }
+
+@media (max-width: 900px) {
+  #app { padding: 16px; min-height: 0; }
+  .tiles { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .tile .value { font-size: 30px; }
+  .tile .value small { display: block; margin: 0; }
+  .body { grid-template-columns: minmax(0, 1fr); }
+  #chart { min-height: 240px; }
+}
+@media (max-width: 520px) {
+  #app { padding: 12px; }
+  #repos td:first-child { white-space: normal; overflow-wrap: anywhere; }
+  th, td { padding: 4px 5px; }
+}
 </style>
 </head>
 <body>
 <div id="gate" class="card">
   <h1>Parallax Shipping</h1>
-  <div class="sub" style="margin-bottom:0">Enter the password to view.</div>
+  <label for="pw">Password</label>
   <form id="gate-form">
-    <input id="pw" type="password" autocomplete="current-password" aria-label="Password" required>
+    <input id="pw" type="password" autocomplete="current-password" aria-describedby="gate-msg" required>
     <button type="submit">Open</button>
   </form>
-  <div class="msg" id="gate-msg" role="alert"></div>
+  <div id="gate-msg" role="alert"></div>
 </div>
 
 <main id="app" class="hidden">
-  <h1>Parallax Shipping</h1>
-  <div class="sub" id="asof"></div>
-  <div id="warnings"></div>
-  <div class="tiles" id="tiles"></div>
-  <div class="card section">
-    <h2>Merged PRs per week, last 12 weeks</h2>
-    <div class="legend">
-      <span><span class="swatch" style="background:var(--series-1)"></span>Merged PRs</span>
-      <span><span class="swatch" style="background:var(--series-2)"></span>Announced (Feature Timeline)</span>
+  <header>
+    <h1>Parallax Shipping</h1>
+    <div class="meta-line">
+      <span id="asof"></span>
+      <button class="linkbtn" id="lock" type="button">Lock</button>
     </div>
-    <div id="chart"><div id="tip"></div></div>
+  </header>
+  <div id="warnings"></div>
+  <section class="tiles" id="tiles" aria-label="Summary"></section>
+  <div class="body">
+    <section class="card panel" aria-labelledby="chart-h">
+      <div class="panel-head">
+        <h2 id="chart-h">Per week, last 12 weeks</h2>
+        <div class="legend">
+          <span><span class="swatch" style="background:var(--series-1)"></span>Merged PRs</span>
+          <span><span class="swatch" style="background:var(--series-2)"></span>Announced</span>
+          <span><span class="swatch partial"></span>Week in progress</span>
+        </div>
+      </div>
+      <div id="chart"><div id="tip" aria-hidden="true"></div></div>
+      <details>
+        <summary>Show as table</summary>
+        <div class="table-wrap" role="region" aria-label="Weekly numbers" tabindex="0"><table id="weeks"></table></div>
+      </details>
+    </section>
+    <section class="card panel" aria-labelledby="repos-h">
+      <div class="panel-head"><h2 id="repos-h">Merged PRs by repo</h2></div>
+      <div class="table-wrap" role="region" aria-labelledby="repos-h" tabindex="0"><table id="repos"></table></div>
+      <div class="note" id="repos-note"></div>
+    </section>
   </div>
-  <div class="card section">
-    <h2>Merged PRs by repo</h2>
-    <div class="table-wrap"><table id="repos"></table></div>
-  </div>
-  <div class="card section">
-    <h2>Weekly detail</h2>
-    <div class="table-wrap"><table id="weeks"></table></div>
-  </div>
-  <div class="foot">
-    <p>Weeks run Monday to Sunday in <span id="tz"></span>. "To date" comparisons use the same elapsed time in the prior week or month.</p>
-    <p>Merged: every merged PR in the active repos of the announcements config. Announced: entries in the Shipped section of the vault Feature Timeline on main, counted by entry date. "In review" entries sit in the auto-filed Candidates block and are not yet curated. Entries in an open review PR count once it merges. [F] feature, [U] upgrade, [N] news, [?] untagged.</p>
-    <p>Refreshed every 6 hours by GitHub Actions. <button class="linkbtn" id="lock" type="button">Lock this device</button></p>
-  </div>
+  <details class="defs">
+    <summary>How these are counted</summary>
+    <p>Weeks run Monday to Sunday in <span id="tz"></span>. "Same point" compares the elapsed part of the current week or month with the same span of the previous one.</p>
+    <p>Merged: every merged PR in the active repos of the announcements config. Announced: entries in the Shipped section of the vault Feature Timeline on main, by entry date. "In review" entries sit in the auto-filed Candidates block and are not yet curated. Entries in an open review PR count once it merges.</p>
+    <p>Refreshed every 6 hours by GitHub Actions.</p>
+  </details>
 </main>
 
-<script id="payload" type="application/json">{"v": 1, "iter": 600000, "salt": "xUwK8HaYlb4v93fQBx+FVg==", "iv": "GrfUyYXDdqWatl9B", "ct": "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"}</script>
+<script id="payload" type="application/json">{"v": 1, "iter": 600000, "salt": "vXFMB/8PJouozDIme5oxYA==", "iv": "trTuSYcqxIV/zhZ7", "ct": "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"}</script>
 <script>
 (function () {
   "use strict";
@@ -170,19 +229,14 @@ tr.total td { font-weight: 600; border-bottom: none; }
     return JSON.parse(new TextDecoder().decode(plain));
   }
 
-  function store(op, v) {
-    try {
-      if (op === "get") return localStorage.getItem(KEY);
-      if (op === "set") localStorage.setItem(KEY, v);
-      if (op === "del") localStorage.removeItem(KEY);
-    } catch (e) { /* storage blocked: fall back to typing the password */ }
-    return null;
-  }
+  // Storage can throw (private mode, blocked site data); the page still works by typing the password.
+  const savedPw = () => { try { return localStorage.getItem(KEY); } catch (e) { return null; } };
+  const savePw = (v) => { try { localStorage.setItem(KEY, v); } catch (e) { /* ignore */ } };
+  const forgetPw = () => { try { localStorage.removeItem(KEY); } catch (e) { /* ignore */ } };
 
-  async function unlock(pw, remember) {
+  async function unlock(pw) {
     try {
       const data = await decrypt(pw);
-      if (remember) store("set", pw);
       $("gate").classList.add("hidden");
       $("app").classList.remove("hidden");
       render(data);
@@ -194,14 +248,20 @@ tr.total td { font-weight: 600; border-bottom: none; }
 
   $("gate-form").addEventListener("submit", async (ev) => {
     ev.preventDefault();
-    $("gate-msg").textContent = "Checking...";
-    const ok = await unlock($("pw").value, true);
-    $("gate-msg").textContent = ok ? "" : "Wrong password.";
+    const pw = $("pw").value;
+    if (await unlock(pw)) {
+      savePw(pw);
+    } else {
+      $("pw").setAttribute("aria-invalid", "true");
+      $("gate-msg").textContent = "Wrong password.";
+      $("pw").select();
+    }
   });
-  $("lock").addEventListener("click", () => { store("del"); location.reload(); });
+  $("pw").addEventListener("input", () => { $("pw").removeAttribute("aria-invalid"); $("gate-msg").textContent = ""; });
+  $("lock").addEventListener("click", () => { forgetPw(); location.reload(); });
 
-  const saved = store("get");
-  if (saved) unlock(saved, false).then((ok) => { if (!ok) store("del"); });
+  const saved = savedPw();
+  if (saved) unlock(saved).then((ok) => { if (!ok) forgetPw(); });
 
   // ------------------------------------------------------------ rendering
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -214,116 +274,136 @@ tr.total td { font-weight: 600; border-bottom: none; }
     return `<span class="delta ${cls}">${sign}${Math.abs(d)}</span> vs ${label} (${prev})`;
   }
 
-  function tags(row) {
-    if (!row.by_tag) return "";
-    const order = ["[F]", "[U]", "[N]", "[?]"];
-    const parts = order.filter((t) => row.by_tag[t]).map((t) => `${row.by_tag[t]} ${t}`);
-    return parts.length ? ` · ${parts.join(", ")}` : "";
+  function announcedLine(row) {
+    if (row.announced === null) return "Announced: unavailable";
+    return `${row.announced} announced${row.in_review ? `, ${row.in_review} in review` : ""}`;
   }
 
-  function tile(label, row, extra, hero) {
-    const ann = row.announced === null ? "announced: unavailable"
-      : `${row.announced} announced${row.in_review ? ` (${row.in_review} in review)` : ""}${tags(row)}`;
-    return `<div class="card tile${hero ? " hero" : ""}">
-      <div class="label">${label}</div>
-      <div class="value">${row.merged}<span class="unit">merged</span></div>
-      <div class="meta">${extra ? extra + "<br>" : ""}${ann}</div></div>`;
+  function tile(label, row, cmp) {
+    const value = `<div class="value">${row.merged}<small>merged PRs</small></div>`;
+    const cmpLine = cmp ? `<div class="sub">${cmp}</div>` : "";
+    const ann = `<div class="sub">${announcedLine(row)}</div>`;
+    return `<div class="card tile"><div class="label">${label}</div>${value}${cmpLine}${ann}</div>`;
   }
+
+  let weeksData = [];
 
   function render(d) {
     const p = d.periods;
-    $("asof").textContent = `Updated ${d.generated_at.replace("T", " ")} (${d.timezone})`;
+    $("asof").textContent = `Updated ${d.generated_at.slice(0, 16).replace("T", " ")} ${d.timezone.split("/").pop()} time`;
     $("tz").textContent = d.timezone;
 
     const warns = d.repos.filter((r) => r.error).map((r) => `${esc(r.repo)}: ${esc(r.error)}`);
     if (d.announced_error) warns.push(`Feature Timeline: ${esc(d.announced_error)}`);
     $("warnings").innerHTML = warns.length
-      ? `<div class="warn" role="status"><strong>Incomplete data.</strong> Counts below are a lower bound. ${warns.join("; ")}</div>` : "";
+      ? `<div class="warn" role="status"><strong>Incomplete data.</strong> Counts are a lower bound. ${warns.join("; ")}</div>` : "";
 
     $("tiles").innerHTML =
-      tile("This week", p.this_week, delta(p.this_week.merged, p.last_week_to_date.merged, "same point last week"), true) +
-      tile("Month to date", p.month_to_date, delta(p.month_to_date.merged, p.last_month_to_date.merged, "same point last month"), false) +
-      tile("Last week", p.last_week, "", false) +
-      tile("Last month", p.last_month, "", false);
+      tile("This week", p.this_week, delta(p.this_week.merged, p.last_week_to_date.merged, "same point last week")) +
+      tile("Month to date", p.month_to_date, delta(p.month_to_date.merged, p.last_month_to_date.merged, "same point last month")) +
+      tile("Last week", p.last_week, "") +
+      tile("Last month", p.last_month, "");
 
-    renderChart(d.weekly);
-
-    const cols = [["this_week", "This week"], ["last_week", "Last week"], ["month_to_date", "MTD"], ["last_month", "Last month"]];
+    const cols = [["this_week", "This wk"], ["last_week", "Last wk"], ["month_to_date", "MTD"], ["last_month", "Last mo"]];
+    const active = d.repos.filter((r) => r.error || cols.some((c) => r[c[0]]));
+    const idle = d.repos.filter((r) => !active.includes(r));
     const total = (k) => d.repos.reduce((s, r) => s + r[k], 0);
+    const cell = (v) => `<td${v ? "" : ' class="zero"'}>${v}</td>`;
     $("repos").innerHTML =
-      `<thead><tr><th>Repo</th>${cols.map((c) => `<th>${c[1]}</th>`).join("")}</tr></thead><tbody>` +
-      d.repos.map((r) => `<tr><td>${esc(r.repo.split("/")[1])}${r.error ? ` <span class="err">(${esc(r.error)})</span>` : ""}</td>${cols.map((c) => `<td>${r[c[0]]}</td>`).join("")}</tr>`).join("") +
+      `<thead><tr><th scope="col">Repo</th>${cols.map((c) => `<th scope="col">${c[1]}</th>`).join("")}</tr></thead><tbody>` +
+      active.map((r) => `<tr><td>${esc(r.repo.split("/")[1])}${r.error ? ` <span class="err">${esc(r.error)}</span>` : ""}</td>${cols.map((c) => cell(r[c[0]])).join("")}</tr>`).join("") +
       `<tr class="total"><td>Total</td>${cols.map((c) => `<td>${total(c[0])}</td>`).join("")}</tr></tbody>`;
+    $("repos-note").textContent = idle.length
+      ? `No merges since last month began: ${idle.map((r) => r.repo.split("/")[1]).join(", ")}.` : "";
 
     $("weeks").innerHTML =
-      `<thead><tr><th>Week of</th><th>Merged</th><th>Announced</th><th>In review</th><th>[F]</th><th>[U]</th></tr></thead><tbody>` +
+      `<thead><tr><th scope="col">Week of</th><th scope="col">Merged</th><th scope="col">Announced</th><th scope="col">In review</th><th scope="col">[F]</th><th scope="col">[U]</th></tr></thead><tbody>` +
       d.weekly.slice().reverse().map((w) => {
         const t = w.by_tag || {};
         const na = w.announced === null;
         return `<tr><td>${fmtDay(w.week_start)}${w.partial ? " (in progress)" : ""}</td><td>${w.merged}</td>` +
           `<td>${na ? "–" : w.announced}</td><td>${na ? "–" : w.in_review}</td><td>${na ? "–" : t["[F]"] || 0}</td><td>${na ? "–" : t["[U]"] || 0}</td></tr>`;
       }).join("") + "</tbody>";
+
+    weeksData = d.weekly;
+    drawChart();
+    new ResizeObserver(drawChart).observe($("chart"));
   }
 
-  function renderChart(weeks) {
-    const narrow = $("chart").clientWidth < 600;
-    const W = narrow ? 420 : 880, H = narrow ? 240 : 260, m = { t: 16, r: 8, b: 28, l: 32 };
-    const every = narrow ? 3 : 2;
+  function weekLabel(w) {
+    return `Week of ${fmtDay(w.week_start)}${w.partial ? " (in progress)" : ""}: ${w.merged} merged, ` +
+      `${w.announced === null ? "announced unavailable" : `${w.announced} announced`}`;
+  }
+
+  function drawChart() {
+    const host = $("chart"), tip = $("tip");
+    const W = host.clientWidth, H = host.clientHeight;
+    if (!W || !H) return;
+    const weeks = weeksData;
+    const m = { t: 18, r: 4, b: 22, l: 30 };
     const iw = W - m.l - m.r, ih = H - m.t - m.b;
     const max = Math.max(1, ...weeks.map((w) => Math.max(w.merged, w.announced || 0)));
-    const step = max <= 5 ? 1 : max <= 12 ? 2 : max <= 30 ? 5 : max <= 60 ? 10 : 20;
+    const step = [1, 2, 5, 10, 20, 25, 50, 100, 200].find((s) => max / s <= 5) || 500;
     const top = Math.ceil(max / step) * step;
     const y = (v) => m.t + ih - (v / top) * ih;
     const slot = iw / weeks.length;
-    const bw = Math.min(22, (slot - (narrow ? 6 : 10)) / 2);
-    const ns = "http://www.w3.org/2000/svg";
-    const svg = document.createElementNS(ns, "svg");
-    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-    svg.setAttribute("role", "img");
-    svg.setAttribute("aria-label", "Merged and announced PRs per week. The weekly detail table has the same data.");
+    const bw = Math.max(3, Math.min(20, (slot - 8) / 2));
+    const every = slot < 40 ? 3 : slot < 64 ? 2 : 1;
     let html = "";
     for (let v = 0; v <= top; v += step) {
-      html += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)" stroke-width="1"/>`;
-      html += `<text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="var(--text-muted)">${v}</text>`;
+      html += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)"/>`;
+      html += `<text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="var(--text-secondary)">${v}</text>`;
     }
-    // Rounded top, square base: a path per bar.
-    const bar = (x, v, color, dash) => {
+    // Rounded top, square base.
+    const bar = (x, v, color, partial) => {
       if (!v) return "";
-      const h = (v / top) * ih, r = Math.min(4, h, bw / 2), y0 = m.t + ih, y1 = y0 - h;
+      const h = (v / top) * ih, r = Math.min(3, h, bw / 2), y0 = m.t + ih, y1 = y0 - h;
       const d = `M${x},${y0}V${y1 + r}Q${x},${y1} ${x + r},${y1}H${x + bw - r}Q${x + bw},${y1} ${x + bw},${y1 + r}V${y0}Z`;
-      return `<path d="${d}" fill="${color}"${dash ? ' fill-opacity="0.55"' : ""}/>`;
+      return `<path d="${d}" fill="${color}"${partial ? ' fill-opacity="0.5"' : ""}/>`;
     };
     weeks.forEach((w, i) => {
       const cx = m.l + slot * i + slot / 2;
       html += bar(cx - bw - 1, w.merged, "var(--series-1)", w.partial);
       html += bar(cx + 1, w.announced || 0, "var(--series-2)", w.partial);
       if ((weeks.length - 1 - i) % every === 0) {
-        html += `<text x="${cx}" y="${H - 8}" text-anchor="middle" font-size="11" fill="var(--text-muted)">${fmtDay(w.week_start)}</text>`;
+        html += `<text x="${cx}" y="${H - 6}" text-anchor="middle" font-size="11" fill="var(--text-secondary)">${fmtDay(w.week_start)}</text>`;
       }
-      html += `<rect data-i="${i}" x="${m.l + slot * i}" y="${m.t}" width="${slot}" height="${ih}" fill="transparent"/>`;
     });
-    const last = weeks[weeks.length - 1];
-    const lx = m.l + slot * (weeks.length - 1) + slot / 2;
-    html += `<text x="${lx}" y="${y(Math.max(last.merged, last.announced || 0)) - 6}" text-anchor="middle" font-size="12" font-weight="600" fill="var(--text-primary)">${last.merged}</text>`;
+    weeks.forEach((w, i) => {
+      html += `<rect class="hit" data-i="${i}" x="${m.l + slot * i}" y="${m.t}" width="${slot}" height="${ih}" tabindex="0" role="img" aria-label="${esc(weekLabel(w))}"/>`;
+    });
+    const ns = "http://www.w3.org/2000/svg";
+    let svg = host.querySelector("svg");
+    if (!svg) {
+      svg = document.createElementNS(ns, "svg");
+      svg.setAttribute("aria-label", "Merged PRs and announced entries per week. Focus a week for its numbers, or open the table below.");
+      host.insertBefore(svg, tip);
+      const show = (el, x, yy) => {
+        const i = el && el.getAttribute && el.getAttribute("data-i");
+        if (i === null || i === undefined) { tip.style.display = "none"; return; }
+        const w = weeksData[+i];
+        tip.innerHTML = `<strong>Week of ${fmtDay(w.week_start)}${w.partial ? " (in progress)" : ""}</strong><br>` +
+          `<span class="swatch" style="background:var(--series-1)"></span>${w.merged} merged<br>` +
+          `<span class="swatch" style="background:var(--series-2)"></span>${w.announced === null ? "–" : w.announced} announced`;
+        tip.style.display = "block";
+        const bw2 = host.clientWidth;
+        let left = x + 12;
+        if (left + tip.offsetWidth > bw2) left = x - tip.offsetWidth - 12;
+        tip.style.left = Math.max(0, left) + "px";
+        tip.style.top = Math.max(0, Math.min(yy, host.clientHeight - tip.offsetHeight)) + "px";
+      };
+      const rel = (ev) => { const b = host.getBoundingClientRect(); return [ev.clientX - b.left, ev.clientY - b.top - 40]; };
+      svg.addEventListener("pointermove", (ev) => show(ev.target, ...rel(ev)));
+      svg.addEventListener("pointerdown", (ev) => show(ev.target, ...rel(ev)));
+      svg.addEventListener("pointerleave", () => { tip.style.display = "none"; });
+      svg.addEventListener("focusin", (ev) => {
+        const r = ev.target.getBBox ? ev.target.getBBox() : null;
+        if (r) show(ev.target, r.x + r.width / 2, m.t);
+      });
+      svg.addEventListener("focusout", () => { tip.style.display = "none"; });
+    }
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
     svg.innerHTML = html;
-    const host = $("chart"), tip = $("tip");
-    host.insertBefore(svg, tip);
-
-    svg.addEventListener("pointermove", (ev) => {
-      const i = ev.target.getAttribute && ev.target.getAttribute("data-i");
-      if (i === null || i === undefined) { tip.style.display = "none"; return; }
-      const w = weeks[+i];
-      tip.innerHTML = `<strong>Week of ${fmtDay(w.week_start)}${w.partial ? " (in progress)" : ""}</strong><br>` +
-        `<span class="swatch" style="background:var(--series-1)"></span>${w.merged} merged<br>` +
-        `<span class="swatch" style="background:var(--series-2)"></span>${w.announced === null ? "–" : w.announced} announced`;
-      tip.style.display = "block";
-      const box = host.getBoundingClientRect();
-      let left = ev.clientX - box.left + 12;
-      if (left + tip.offsetWidth > box.width) left = ev.clientX - box.left - tip.offsetWidth - 12;
-      tip.style.left = Math.max(0, left) + "px";
-      tip.style.top = Math.max(0, ev.clientY - box.top - tip.offsetHeight - 8) + "px";
-    });
-    svg.addEventListener("pointerleave", () => { tip.style.display = "none"; });
   }
 })();
 </script>
