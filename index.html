@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Parallax Shipping</title>
+<style>
+:root {
+  color-scheme: light;
+  --surface-0: #f4f4f2;
+  --surface-1: #fcfcfb;
+  --border: #e2e1dc;
+  --grid: #ecebe7;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #77766f;
+  --series-1: #2a78d6;
+  --series-2: #eb6834;
+  --good: #0f7a3d;
+  --bad: #b3261e;
+  --warn-bg: #fff4d6;
+  --warn-text: #6b4a00;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --surface-0: #111110;
+    --surface-1: #1a1a19;
+    --border: #2e2e2c;
+    --grid: #262624;
+    --text-primary: #f0efec;
+    --text-secondary: #c3c2b7;
+    --text-muted: #9a998f;
+    --series-1: #3987e5;
+    --series-2: #d95926;
+    --good: #5cc98a;
+    --bad: #f2867d;
+    --warn-bg: #3a2e0a;
+    --warn-text: #f3d68a;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --surface-0: #111110;
+  --surface-1: #1a1a19;
+  --border: #2e2e2c;
+  --grid: #262624;
+  --text-primary: #f0efec;
+  --text-secondary: #c3c2b7;
+  --text-muted: #9a998f;
+  --series-1: #3987e5;
+  --series-2: #d95926;
+  --good: #5cc98a;
+  --bad: #f2867d;
+  --warn-bg: #3a2e0a;
+  --warn-text: #f3d68a;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--surface-0);
+  color: var(--text-primary);
+  font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+main { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; }
+h1 { font-size: 20px; margin: 0; font-weight: 600; }
+h2 { font-size: 15px; margin: 0 0 12px; font-weight: 600; }
+.sub { color: var(--text-secondary); font-size: 13px; margin: 4px 0 20px; }
+.card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; margin-bottom: 16px; }
+.tile .label { color: var(--text-secondary); font-size: 13px; }
+.tile .value { font-size: 40px; font-weight: 600; line-height: 1.1; margin: 6px 0 2px; }
+.tile.hero .value { font-size: 52px; }
+.tile .unit { font-size: 14px; font-weight: 400; color: var(--text-secondary); margin-left: 4px; }
+.tile .meta { font-size: 13px; color: var(--text-secondary); }
+.delta.up { color: var(--good); }
+.delta.down { color: var(--bad); }
+.delta.flat { color: var(--text-muted); }
+.section { margin-bottom: 16px; }
+.legend { display: flex; gap: 16px; font-size: 13px; color: var(--text-secondary); margin-bottom: 8px; flex-wrap: wrap; }
+.swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+#chart { position: relative; }
+#chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+#tip {
+  position: absolute; pointer-events: none; display: none;
+  background: var(--surface-1); border: 1px solid var(--border); border-radius: 6px;
+  padding: 6px 10px; font-size: 13px; box-shadow: 0 2px 8px rgb(0 0 0 / 0.12); white-space: nowrap;
+}
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th, td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--grid); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+th { color: var(--text-secondary); font-weight: 500; font-size: 13px; }
+td { font-variant-numeric: tabular-nums; }
+tr.total td { font-weight: 600; border-bottom: none; }
+.err { color: var(--bad); font-size: 12px; }
+.warn { background: var(--warn-bg); color: var(--warn-text); border-radius: 8px; padding: 10px 12px; font-size: 13px; margin-bottom: 16px; }
+.foot { color: var(--text-muted); font-size: 12px; margin-top: 20px; }
+.foot p { margin: 4px 0; }
+#gate { max-width: 340px; margin: 18vh auto 0; }
+#gate form { display: flex; gap: 8px; margin-top: 12px; }
+#gate input {
+  flex: 1; min-width: 0; font: inherit; padding: 8px 10px; border-radius: 8px;
+  border: 1px solid var(--border); background: var(--surface-0); color: var(--text-primary);
+}
+#gate button, .linkbtn {
+  font: inherit; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--series-1); color: #fff; cursor: pointer;
+}
+.linkbtn { background: none; color: var(--text-muted); padding: 0; border: none; font-size: 12px; text-decoration: underline; }
+#gate .msg { color: var(--bad); font-size: 13px; min-height: 1.4em; margin-top: 8px; }
+.hidden { display: none; }
+</style>
+</head>
+<body>
+<div id="gate" class="card">
+  <h1>Parallax Shipping</h1>
+  <div class="sub" style="margin-bottom:0">Enter the password to view.</div>
+  <form id="gate-form">
+    <input id="pw" type="password" autocomplete="current-password" aria-label="Password" required>
+    <button type="submit">Open</button>
+  </form>
+  <div class="msg" id="gate-msg" role="alert"></div>
+</div>
+
+<main id="app" class="hidden">
+  <h1>Parallax Shipping</h1>
+  <div class="sub" id="asof"></div>
+  <div id="warnings"></div>
+  <div class="tiles" id="tiles"></div>
+  <div class="card section">
+    <h2>Merged PRs per week, last 12 weeks</h2>
+    <div class="legend">
+      <span><span class="swatch" style="background:var(--series-1)"></span>Merged PRs</span>
+      <span><span class="swatch" style="background:var(--series-2)"></span>Announced (Feature Timeline)</span>
+    </div>
+    <div id="chart"><div id="tip"></div></div>
+  </div>
+  <div class="card section">
+    <h2>Merged PRs by repo</h2>
+    <div class="table-wrap"><table id="repos"></table></div>
+  </div>
+  <div class="card section">
+    <h2>Weekly detail</h2>
+    <div class="table-wrap"><table id="weeks"></table></div>
+  </div>
+  <div class="foot">
+    <p>Weeks run Monday to Sunday in <span id="tz"></span>. "To date" comparisons use the same elapsed time in the prior week or month.</p>
+    <p>Merged: every merged PR in the active repos of the announcements config. Announced: entries in the Shipped section of the vault Feature Timeline on main, counted by entry date. "In review" entries sit in the auto-filed Candidates block and are not yet curated. Entries in an open review PR count once it merges. [F] feature, [U] upgrade, [N] news, [?] untagged.</p>
+    <p>Refreshed every 6 hours by GitHub Actions. <button class="linkbtn" id="lock" type="button">Lock this device</button></p>
+  </div>
+</main>
+
+<script id="payload" type="application/json">{"v": 1, "iter": 600000, "salt": "xUwK8HaYlb4v93fQBx+FVg==", "iv": "GrfUyYXDdqWatl9B", "ct": "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"}</script>
+<script>
+(function () {
+  "use strict";
+  const KEY = "parallax-shipping-pw";
+  const blob = JSON.parse(document.getElementById("payload").textContent);
+  const $ = (id) => document.getElementById(id);
+  const b64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+
+  async function decrypt(password) {
+    const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveKey"]);
+    const key = await crypto.subtle.deriveKey(
+      { name: "PBKDF2", hash: "SHA-256", salt: b64(blob.salt), iterations: blob.iter },
+      base, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+    const plain = await crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(blob.iv) }, key, b64(blob.ct));
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
+
+  function store(op, v) {
+    try {
+      if (op === "get") return localStorage.getItem(KEY);
+      if (op === "set") localStorage.setItem(KEY, v);
+      if (op === "del") localStorage.removeItem(KEY);
+    } catch (e) { /* storage blocked: fall back to typing the password */ }
+    return null;
+  }
+
+  async function unlock(pw, remember) {
+    try {
+      const data = await decrypt(pw);
+      if (remember) store("set", pw);
+      $("gate").classList.add("hidden");
+      $("app").classList.remove("hidden");
+      render(data);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  $("gate-form").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    $("gate-msg").textContent = "Checking...";
+    const ok = await unlock($("pw").value, true);
+    $("gate-msg").textContent = ok ? "" : "Wrong password.";
+  });
+  $("lock").addEventListener("click", () => { store("del"); location.reload(); });
+
+  const saved = store("get");
+  if (saved) unlock(saved, false).then((ok) => { if (!ok) store("del"); });
+
+  // ------------------------------------------------------------ rendering
+  const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const fmtDay = (iso) => new Date(iso + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" });
+
+  function delta(cur, prev, label) {
+    const d = cur - prev;
+    const cls = d > 0 ? "up" : d < 0 ? "down" : "flat";
+    const sign = d > 0 ? "+" : d < 0 ? "−" : "±";
+    return `<span class="delta ${cls}">${sign}${Math.abs(d)}</span> vs ${label} (${prev})`;
+  }
+
+  function tags(row) {
+    if (!row.by_tag) return "";
+    const order = ["[F]", "[U]", "[N]", "[?]"];
+    const parts = order.filter((t) => row.by_tag[t]).map((t) => `${row.by_tag[t]} ${t}`);
+    return parts.length ? ` · ${parts.join(", ")}` : "";
+  }
+
+  function tile(label, row, extra, hero) {
+    const ann = row.announced === null ? "announced: unavailable"
+      : `${row.announced} announced${row.in_review ? ` (${row.in_review} in review)` : ""}${tags(row)}`;
+    return `<div class="card tile${hero ? " hero" : ""}">
+      <div class="label">${label}</div>
+      <div class="value">${row.merged}<span class="unit">merged</span></div>
+      <div class="meta">${extra ? extra + "<br>" : ""}${ann}</div></div>`;
+  }
+
+  function render(d) {
+    const p = d.periods;
+    $("asof").textContent = `Updated ${d.generated_at.replace("T", " ")} (${d.timezone})`;
+    $("tz").textContent = d.timezone;
+
+    const warns = d.repos.filter((r) => r.error).map((r) => `${esc(r.repo)}: ${esc(r.error)}`);
+    if (d.announced_error) warns.push(`Feature Timeline: ${esc(d.announced_error)}`);
+    $("warnings").innerHTML = warns.length
+      ? `<div class="warn" role="status"><strong>Incomplete data.</strong> Counts below are a lower bound. ${warns.join("; ")}</div>` : "";
+
+    $("tiles").innerHTML =
+      tile("This week", p.this_week, delta(p.this_week.merged, p.last_week_to_date.merged, "same point last week"), true) +
+      tile("Month to date", p.month_to_date, delta(p.month_to_date.merged, p.last_month_to_date.merged, "same point last month"), false) +
+      tile("Last week", p.last_week, "", false) +
+      tile("Last month", p.last_month, "", false);
+
+    renderChart(d.weekly);
+
+    const cols = [["this_week", "This week"], ["last_week", "Last week"], ["month_to_date", "MTD"], ["last_month", "Last month"]];
+    const total = (k) => d.repos.reduce((s, r) => s + r[k], 0);
+    $("repos").innerHTML =
+      `<thead><tr><th>Repo</th>${cols.map((c) => `<th>${c[1]}</th>`).join("")}</tr></thead><tbody>` +
+      d.repos.map((r) => `<tr><td>${esc(r.repo.split("/")[1])}${r.error ? ` <span class="err">(${esc(r.error)})</span>` : ""}</td>${cols.map((c) => `<td>${r[c[0]]}</td>`).join("")}</tr>`).join("") +
+      `<tr class="total"><td>Total</td>${cols.map((c) => `<td>${total(c[0])}</td>`).join("")}</tr></tbody>`;
+
+    $("weeks").innerHTML =
+      `<thead><tr><th>Week of</th><th>Merged</th><th>Announced</th><th>In review</th><th>[F]</th><th>[U]</th></tr></thead><tbody>` +
+      d.weekly.slice().reverse().map((w) => {
+        const t = w.by_tag || {};
+        const na = w.announced === null;
+        return `<tr><td>${fmtDay(w.week_start)}${w.partial ? " (in progress)" : ""}</td><td>${w.merged}</td>` +
+          `<td>${na ? "–" : w.announced}</td><td>${na ? "–" : w.in_review}</td><td>${na ? "–" : t["[F]"] || 0}</td><td>${na ? "–" : t["[U]"] || 0}</td></tr>`;
+      }).join("") + "</tbody>";
+  }
+
+  function renderChart(weeks) {
+    const narrow = $("chart").clientWidth < 600;
+    const W = narrow ? 420 : 880, H = narrow ? 240 : 260, m = { t: 16, r: 8, b: 28, l: 32 };
+    const every = narrow ? 3 : 2;
+    const iw = W - m.l - m.r, ih = H - m.t - m.b;
+    const max = Math.max(1, ...weeks.map((w) => Math.max(w.merged, w.announced || 0)));
+    const step = max <= 5 ? 1 : max <= 12 ? 2 : max <= 30 ? 5 : max <= 60 ? 10 : 20;
+    const top = Math.ceil(max / step) * step;
+    const y = (v) => m.t + ih - (v / top) * ih;
+    const slot = iw / weeks.length;
+    const bw = Math.min(22, (slot - (narrow ? 6 : 10)) / 2);
+    const ns = "http://www.w3.org/2000/svg";
+    const svg = document.createElementNS(ns, "svg");
+    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+    svg.setAttribute("role", "img");
+    svg.setAttribute("aria-label", "Merged and announced PRs per week. The weekly detail table has the same data.");
+    let html = "";
+    for (let v = 0; v <= top; v += step) {
+      html += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)" stroke-width="1"/>`;
+      html += `<text x="${m.l - 6}" y="${y(v) + 4}" text-anchor="end" font-size="11" fill="var(--text-muted)">${v}</text>`;
+    }
+    // Rounded top, square base: a path per bar.
+    const bar = (x, v, color, dash) => {
+      if (!v) return "";
+      const h = (v / top) * ih, r = Math.min(4, h, bw / 2), y0 = m.t + ih, y1 = y0 - h;
+      const d = `M${x},${y0}V${y1 + r}Q${x},${y1} ${x + r},${y1}H${x + bw - r}Q${x + bw},${y1} ${x + bw},${y1 + r}V${y0}Z`;
+      return `<path d="${d}" fill="${color}"${dash ? ' fill-opacity="0.55"' : ""}/>`;
+    };
+    weeks.forEach((w, i) => {
+      const cx = m.l + slot * i + slot / 2;
+      html += bar(cx - bw - 1, w.merged, "var(--series-1)", w.partial);
+      html += bar(cx + 1, w.announced || 0, "var(--series-2)", w.partial);
+      if ((weeks.length - 1 - i) % every === 0) {
+        html += `<text x="${cx}" y="${H - 8}" text-anchor="middle" font-size="11" fill="var(--text-muted)">${fmtDay(w.week_start)}</text>`;
+      }
+      html += `<rect data-i="${i}" x="${m.l + slot * i}" y="${m.t}" width="${slot}" height="${ih}" fill="transparent"/>`;
+    });
+    const last = weeks[weeks.length - 1];
+    const lx = m.l + slot * (weeks.length - 1) + slot / 2;
+    html += `<text x="${lx}" y="${y(Math.max(last.merged, last.announced || 0)) - 6}" text-anchor="middle" font-size="12" font-weight="600" fill="var(--text-primary)">${last.merged}</text>`;
+    svg.innerHTML = html;
+    const host = $("chart"), tip = $("tip");
+    host.insertBefore(svg, tip);
+
+    svg.addEventListener("pointermove", (ev) => {
+      const i = ev.target.getAttribute && ev.target.getAttribute("data-i");
+      if (i === null || i === undefined) { tip.style.display = "none"; return; }
+      const w = weeks[+i];
+      tip.innerHTML = `<strong>Week of ${fmtDay(w.week_start)}${w.partial ? " (in progress)" : ""}</strong><br>` +
+        `<span class="swatch" style="background:var(--series-1)"></span>${w.merged} merged<br>` +
+        `<span class="swatch" style="background:var(--series-2)"></span>${w.announced === null ? "–" : w.announced} announced`;
+      tip.style.display = "block";
+      const box = host.getBoundingClientRect();
+      let left = ev.clientX - box.left + 12;
+      if (left + tip.offsetWidth > box.width) left = ev.clientX - box.left - tip.offsetWidth - 12;
+      tip.style.left = Math.max(0, left) + "px";
+      tip.style.top = Math.max(0, ev.clientY - box.top - tip.offsetHeight - 8) + "px";
+    });
+    svg.addEventListener("pointerleave", () => { tip.style.display = "none"; });
+  }
+})();
+</script>
+</body>
+</html>
